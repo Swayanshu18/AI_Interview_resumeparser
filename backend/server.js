@@ -17,9 +17,7 @@ app.use(helmet());
 
 // CORS configuration - allow multiple origins
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000',
-  'https://ai-interview-resumeparser-ho2q-obq98upv0.vercel.app',
-  /\.vercel\.app$/ // Allow all Vercel preview deployments
+ '*' // Allow all Vercel preview deployments
 ];
 
 app.use(cors({
