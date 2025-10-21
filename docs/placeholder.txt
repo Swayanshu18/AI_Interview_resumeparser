@@ -1,0 +1,5 @@
+Add screenshots here:
+- landing.png - Landing page screenshot
+- upload.png - Document upload page screenshot
+
+You can take screenshots from your deployed Vercel app and save them in this folder.

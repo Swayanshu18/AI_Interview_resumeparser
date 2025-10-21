@@ -7,11 +7,10 @@ const Document = require('../models/Document');
 const { uploadToS3, deleteFromS3 } = require('../utils/s3');
 const { generateBatchEmbeddings, chunkText } = require('../utils/ai');
 
-// Configure multer for file upload
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 2 * 1024 * 1024 // 2MB limit
+    fileSize: 2 * 1024 * 1024
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
@@ -22,7 +21,6 @@ const upload = multer({
   }
 });
 
-// POST /api/documents/upload
 router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -34,19 +32,16 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       return res.status(400).json({ error: 'Invalid document type' });
     }
 
-    // Check if user already has a document of this type
     const existingDoc = await Document.findOne({
       userId: req.userId,
       type
     });
 
     if (existingDoc) {
-      // Delete old document from S3
       await deleteFromS3(existingDoc.s3Key);
       await Document.deleteOne({ _id: existingDoc._id });
     }
 
-    // Parse PDF
     const pdfData = await pdfParse(req.file.buffer);
     const fullText = pdfData.text;
 
@@ -54,28 +49,23 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       return res.status(400).json({ error: 'Could not extract text from PDF' });
     }
 
-    // Upload to S3
     const s3Key = `${req.userId}/${type}_${Date.now()}.pdf`;
     const s3Url = await uploadToS3(req.file, s3Key);
 
-    // Chunk the text
     const textChunks = chunkText(fullText, 500);
 
-    // Generate embeddings for all chunks in a single batch API call (MUCH FASTER!)
     console.log(`📄 Processing ${textChunks.length} chunks for ${type}...`);
     const embeddings = await generateBatchEmbeddings(textChunks);
 
-    // Combine chunks with their embeddings
     const chunks = textChunks.map((text, index) => ({
       text,
       embedding: embeddings[index],
       metadata: {
         chunkIndex: index,
-        pageNumber: Math.floor(index / 3) + 1 // Approximate page number
+        pageNumber: Math.floor(index / 3) + 1
       }
     }));
 
-    // Save document to database
     const document = new Document({
       userId: req.userId,
       type,
@@ -104,7 +94,6 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
   }
 });
 
-// GET /api/documents/list
 router.get('/list', authMiddleware, async (req, res) => {
   try {
     const documents = await Document.find({ userId: req.userId })
@@ -125,7 +114,6 @@ router.get('/list', authMiddleware, async (req, res) => {
   }
 });
 
-// DELETE /api/documents/:id
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const document = await Document.findOne({
@@ -137,10 +125,8 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Document not found' });
     }
 
-    // Delete from S3
     await deleteFromS3(document.s3Key);
 
-    // Delete from database
     await Document.deleteOne({ _id: document._id });
 
     res.json({ message: 'Document deleted successfully' });

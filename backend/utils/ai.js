@@ -1,12 +1,10 @@
 const OpenAI = require('openai');
 
-// Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   baseURL: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1'
 });
 
-// Generate embedding for text using OpenAI's latest embedding model
 async function generateEmbedding(text) {
   try {
     const model = process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-large';
@@ -22,12 +20,10 @@ async function generateEmbedding(text) {
   } catch (error) {
     console.error('Embedding generation error:', error.message);
     console.log('Falling back to simple embedding for development');
-    // Fallback to simple hash-based embedding
     return generateSimpleEmbedding(text);
   }
 }
 
-// Generate embeddings for multiple texts in batch (MUCH FASTER!)
 async function generateBatchEmbeddings(texts) {
   try {
     const model = process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-large';
@@ -37,7 +33,7 @@ async function generateBatchEmbeddings(texts) {
 
     const response = await openai.embeddings.create({
       model: model,
-      input: texts, // Pass array of texts for batch processing
+      input: texts,
       encoding_format: "float"
     });
 
@@ -48,25 +44,20 @@ async function generateBatchEmbeddings(texts) {
   } catch (error) {
     console.error('Batch embedding generation error:', error.message);
     console.log('Falling back to simple embeddings for development');
-    // Fallback to simple embeddings
     return texts.map(text => generateSimpleEmbedding(text));
   }
 }
 
-// Simple embedding fallback (for development/testing)
-// text-embedding-3-small produces 1536-dimensional vectors by default
 function generateSimpleEmbedding(text) {
   const embedding = new Array(1536).fill(0);
   for (let i = 0; i < text.length; i++) {
     const index = i % 1536;
     embedding[index] += text.charCodeAt(i) / 1000;
   }
-  // Normalize
   const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
   return embedding.map(val => val / magnitude);
 }
 
-// Calculate cosine similarity between two embeddings
 function cosineSimilarity(embedding1, embedding2) {
   let dotProduct = 0;
   let magnitude1 = 0;
@@ -88,7 +79,6 @@ function cosineSimilarity(embedding1, embedding2) {
   return dotProduct / (magnitude1 * magnitude2);
 }
 
-// Chunk text into smaller pieces
 function chunkText(text, maxChunkSize = 500) {
   const words = text.split(/\s+/);
   const chunks = [];
@@ -109,7 +99,6 @@ function chunkText(text, maxChunkSize = 500) {
   return chunks;
 }
 
-// Find most similar chunks
 async function findSimilarChunks(queryEmbedding, documents, topK = 2) {
   const similarities = [];
 
@@ -128,7 +117,6 @@ async function findSimilarChunks(queryEmbedding, documents, topK = 2) {
     }
   }
 
-  // Sort by similarity and return top K
   similarities.sort((a, b) => b.similarity - a.similarity);
   return similarities.slice(0, topK);
 }

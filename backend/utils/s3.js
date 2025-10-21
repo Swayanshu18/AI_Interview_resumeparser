@@ -1,6 +1,5 @@
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 
-// Configure AWS S3 Client
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'us-east-1',
   credentials: {
@@ -11,7 +10,6 @@ const s3Client = new S3Client({
 
 const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
 
-// Upload file to S3
 const uploadToS3 = async (file, key) => {
   try {
     if (!BUCKET_NAME) {
@@ -22,18 +20,16 @@ const uploadToS3 = async (file, key) => {
       throw new Error('AWS credentials are not configured');
     }
 
-    // Upload to S3
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
       Body: file.buffer,
       ContentType: file.mimetype || 'application/pdf',
-      ACL: 'private' // Make files private by default
+      ACL: 'private'
     });
 
     await s3Client.send(command);
 
-    // Return S3 URL
     const url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
 
     console.log(`✅ File uploaded to S3: ${key}`);
@@ -44,7 +40,6 @@ const uploadToS3 = async (file, key) => {
   }
 };
 
-// Delete file from S3
 const deleteFromS3 = async (key) => {
   try {
     if (!BUCKET_NAME) {
