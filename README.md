@@ -2,7 +2,7 @@
 
 Practice interviews with an AI that knows your resume and the job you're applying for.
 
-![Landing Page](D:\upivot_assignment\interview-prep-app\images\WhatsApp Image 2025-10-22 at 01.49.38.jpeg)
+![Landing Page](./images/WhatsApp%20Image%202025-10-22%20at%2001.49.38.jpeg)
 
 ## What it does
 
@@ -12,8 +12,8 @@ Upload your resume + job description → AI asks you interview questions → Get
 
 <table>
   <tr>
-    <td><img src="interview-prep-app\images\WhatsApp Image 2025-10-22 at 01.49.38.jpeg" alt="Landing" width="400"/></td>
-    <td><img src="interview-prep-app\images\WhatsApp Image 2025-10-22 at 01.50.09.jpeg" alt="Upload" width="400"/></td>
+    <td><img src="./images/WhatsApp%20Image%202025-10-22%20at%2001.49.38.jpeg" alt="Landing" width="400"/></td>
+    <td><img src="./images/WhatsApp%20Image%202025-10-22%20at%2001.50.09.jpeg" alt="Upload" width="400"/></td>
   </tr>
 </table>
 
