@@ -85,38 +85,7 @@ interview-prep-app/
 - ⚡ Sequential questions (one at a time)
 - 💬 End-of-interview comprehensive evaluation
 
-## API Flow
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant Backend
-    participant MongoDB
-    participant OpenAI
-    participant S3
-
-    User->>Frontend: Upload Resume
-    Frontend->>Backend: POST /api/documents/upload
-    Backend->>S3: Store PDF
-    Backend->>OpenAI: Generate embeddings
-    Backend->>MongoDB: Save doc with embeddings
-    Backend->>Frontend: Success
-
-    User->>Frontend: Start Interview
-    Frontend->>Backend: POST /api/chat/start
-    Backend->>OpenAI: Generate first question
-    Backend->>MongoDB: Create chat session
-    Backend->>Frontend: Return question
-
-    User->>Frontend: Answer
-    Frontend->>Backend: POST /api/chat/query
-    Backend->>OpenAI: Embed answer
-    Backend->>MongoDB: Find similar resume chunks
-    Backend->>OpenAI: Evaluate answer with context
-    Backend->>MongoDB: Save message
-    Backend->>Frontend: Score + Feedback + Next Q
-```
 
 ## Environment Variables
 
