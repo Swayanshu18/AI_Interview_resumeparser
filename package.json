@@ -1,0 +1,18 @@
+{
+  "name": "interview-prep-ai",
+  "version": "1.0.0",
+  "description": "AI-Powered Interview Prep Application",
+  "private": true,
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:backend": "cd backend && npm install",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": ["interview", "ai", "resume", "job"],
+  "author": "Swayanshu",
+  "license": "MIT"
+}
