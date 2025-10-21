@@ -5,8 +5,26 @@ This guide explains how to deploy the Interview Prep AI application to Vercel.
 ## Architecture
 
 This is a monorepo with two separate applications:
-- **Backend (API)**: Node.js/Express server
+- **Backend (API)**: Node.js/Express server with AWS S3 storage
 - **Frontend**: React/Vite application
+
+## Important: File Storage with AWS S3
+
+✅ **This app uses AWS S3 for file storage**, which provides:
+- Persistent, reliable file storage
+- Scalable for production use
+- Works perfectly with Vercel serverless functions
+- Cost-effective (~$0.023/GB/month)
+
+📖 **See [AWS_S3_SETUP.md](./AWS_S3_SETUP.md) for complete S3 setup instructions**
+
+## Prerequisites
+
+Before deploying, set up:
+1. ✅ MongoDB Atlas account (free tier)
+2. ✅ AWS S3 bucket (see [AWS_S3_SETUP.md](./AWS_S3_SETUP.md))
+3. ✅ OpenAI API key
+4. ✅ Git repository pushed to GitHub/GitLab
 
 ## Deployment Steps
 
@@ -30,6 +48,10 @@ This is a monorepo with two separate applications:
    JWT_SECRET=your_jwt_secret_key
    NODE_ENV=production
    FRONTEND_URL=https://your-frontend-url.vercel.app
+   AWS_ACCESS_KEY_ID=your_aws_access_key_id
+   AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+   AWS_REGION=us-east-1
+   AWS_S3_BUCKET_NAME=your-bucket-name
    ```
 
 6. Deploy!

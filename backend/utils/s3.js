@@ -1,45 +1,69 @@
-const fs = require('fs');
-const path = require('path');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Configure AWS S3 Client
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
+});
 
-// Upload file to local storage (instead of S3)
+const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
+
+// Upload file to S3
 const uploadToS3 = async (file, key) => {
   try {
-    const filePath = path.join(uploadsDir, key);
-
-    // Ensure directory exists
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    if (!BUCKET_NAME) {
+      throw new Error('AWS_S3_BUCKET_NAME environment variable is not set');
     }
 
-    // Write file to disk
-    fs.writeFileSync(filePath, file.buffer);
+    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+      throw new Error('AWS credentials are not configured');
+    }
 
-    // Return a mock URL (in production, this would be the S3 URL)
-    const url = `/uploads/${key}`;
+    // Upload to S3
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: file.buffer,
+      ContentType: file.mimetype || 'application/pdf',
+      ACL: 'private' // Make files private by default
+    });
+
+    await s3Client.send(command);
+
+    // Return S3 URL
+    const url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
+
+    console.log(`✅ File uploaded to S3: ${key}`);
     return url;
   } catch (error) {
-    console.error('File upload error:', error);
-    throw new Error('Failed to upload file');
+    console.error('S3 upload error:', error);
+    throw new Error(`Failed to upload file to S3: ${error.message}`);
   }
 };
 
-// Delete file from local storage (instead of S3)
+// Delete file from S3
 const deleteFromS3 = async (key) => {
   try {
-    const filePath = path.join(uploadsDir, key);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (!BUCKET_NAME) {
+      console.warn('AWS_S3_BUCKET_NAME not set, skipping deletion');
+      return false;
     }
+
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key
+    });
+
+    await s3Client.send(command);
+
+    console.log(`✅ File deleted from S3: ${key}`);
+    return true;
   } catch (error) {
-    console.error('File delete error:', error);
-    throw new Error('Failed to delete file');
+    console.error('S3 delete error:', error);
+    return false;
   }
 };
 
